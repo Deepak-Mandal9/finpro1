@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const { promises: dns } = require('dns');
 require('dotenv').config();
 require('pg');
 require('pg-hstore');
@@ -25,6 +26,34 @@ if (process.env.DATABASE_URL || process.env.NODE_ENV === 'production') {
   };
 }
 
+const getDatabaseHost = () => {
+  if (process.env.DATABASE_URL) {
+    try {
+      return new URL(process.env.DATABASE_URL).hostname;
+    } catch (error) {
+      console.error('❌ Invalid DATABASE_URL format:', error.message);
+      return process.env.DB_HOST;
+    }
+  }
+  return process.env.DB_HOST;
+};
+
+const resolveDatabaseHost = async () => {
+  const host = getDatabaseHost();
+  if (!host) {
+    throw new Error('DB host is not configured');
+  }
+
+  try {
+    const addresses = await dns.lookup(host, { all: true });
+    console.log('🔍 DB host DNS lookup', { host, addresses });
+    return addresses;
+  } catch (error) {
+    console.error('🔍 DB host DNS lookup failed:', error.message);
+    throw error;
+  }
+};
+
 const sequelize = process.env.DATABASE_URL
   ? new Sequelize(process.env.DATABASE_URL, sequelizeOptions)
   : new Sequelize(
@@ -36,6 +65,7 @@ const sequelize = process.env.DATABASE_URL
 
 const connectDB = async () => {
   try {
+    await resolveDatabaseHost();
     await sequelize.authenticate();
     console.log('✅ PostgreSQL connected successfully');
   } catch (error) {

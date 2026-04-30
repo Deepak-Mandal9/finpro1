@@ -1,4 +1,4 @@
-# Abira Wealth — Backend API
+# FinPro — Backend API
 
 > Node.js + Express + PostgreSQL backend for the FinPro Wealth Management Platform.
 

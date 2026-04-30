@@ -47,4 +47,8 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;

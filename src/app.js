@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+const { connectDB } = require('./config/database');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
 const authRoutes        = require('./routes/auth');
@@ -16,6 +17,21 @@ const goalRoutes        = require('./routes/goals');
 const dashboardRoutes   = require('./routes/dashboard');
 
 const app = express();
+
+let dbConnected = false;
+app.use(async (req, res, next) => {
+  if (dbConnected) {
+    return next();
+  }
+
+  try {
+    await connectDB();
+    dbConnected = true;
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 // ── Security ─────────────────────────────────────────────────────
 app.use(helmet());

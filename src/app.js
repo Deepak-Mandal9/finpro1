@@ -107,6 +107,7 @@ app.get('/health', (req, res) => {
 // ── Swagger / OpenAPI ──────────────────────────────────────────────
 if (swaggerEnabled) {
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+  app.get('/api/docs/*', swaggerUi.serve);
   app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 } else {
   app.use('/api/docs', (req, res) => {

@@ -158,6 +158,15 @@ Authorization: Bearer <accessToken>
 GET /health
 ```
 
+## 📘 Swagger API Docs
+- Local/dev docs: `http://localhost:5000/api/docs`
+- OpenAPI JSON: `http://localhost:5000/api/docs.json`
+- In production, docs are disabled by default for security.
+- To enable docs in production set:
+```bash
+SWAGGER_ENABLE=true
+```
+
 ---
 
 ## 🔐 Auth Flow

@@ -7,6 +7,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 require('dotenv').config();
 
+const swaggerEnabled = process.env.SWAGGER_ENABLE === 'true' || process.env.NODE_ENV !== 'production';
+
 const { connectDB } = require('./config/database');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 
@@ -79,6 +81,19 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
+// ── Root landing page ─────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'FinPro API is running.',
+    routes: {
+      health: '/health',
+      docs: '/api/docs',
+      apiBase: '/api',
+    },
+  });
+});
+
 // ── Health check ──────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({
@@ -90,8 +105,24 @@ app.get('/health', (req, res) => {
 });
 
 // ── Swagger / OpenAPI ──────────────────────────────────────────────
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
-app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
+if (swaggerEnabled) {
+  app.get('/api/docs/', (req, res) => {
+    res.redirect('/api/docs');
+  });
+  app.use('/api/docs', swaggerUi.serve);
+  app.get('/api/docs', swaggerUi.setup(swaggerSpec, { explorer: true }));
+  app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
+} else {
+  app.get('/api/docs/', (req, res) => {
+    res.status(404).json({ success: false, message: 'API documentation is disabled in production.' });
+  });
+  app.get('/api/docs', (req, res) => {
+    res.status(404).json({ success: false, message: 'API documentation is disabled in production.' });
+  });
+  app.get('/api/docs.json', (req, res) => {
+    res.status(404).json({ success: false, message: 'API documentation is disabled in production.' });
+  });
+}
 
 // ── API Routes ────────────────────────────────────────────────────
 app.use('/api/auth',         authRoutes);

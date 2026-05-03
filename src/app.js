@@ -3,6 +3,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 require('dotenv').config();
 
 const { connectDB } = require('./config/database');
@@ -86,6 +88,10 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV,
   });
 });
+
+// ── Swagger / OpenAPI ──────────────────────────────────────────────
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
+app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 
 // ── API Routes ────────────────────────────────────────────────────
 app.use('/api/auth',         authRoutes);

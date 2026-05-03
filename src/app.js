@@ -106,17 +106,10 @@ app.get('/health', (req, res) => {
 
 // ── Swagger / OpenAPI ──────────────────────────────────────────────
 if (swaggerEnabled) {
-  app.get('/api/docs/', (req, res) => {
-    res.redirect('/api/docs');
-  });
-  app.use('/api/docs', swaggerUi.serve);
-  app.get('/api/docs', swaggerUi.setup(swaggerSpec, { explorer: true }));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
   app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 } else {
-  app.get('/api/docs/', (req, res) => {
-    res.status(404).json({ success: false, message: 'API documentation is disabled in production.' });
-  });
-  app.get('/api/docs', (req, res) => {
+  app.use('/api/docs', (req, res) => {
     res.status(404).json({ success: false, message: 'API documentation is disabled in production.' });
   });
   app.get('/api/docs.json', (req, res) => {

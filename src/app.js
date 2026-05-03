@@ -21,6 +21,7 @@ const goalRoutes        = require('./routes/goals');
 const dashboardRoutes   = require('./routes/dashboard');
 
 const app = express();
+app.set('trust proxy', 1);
 
 let dbConnected = false;
 app.use(async (req, res, next) => {
